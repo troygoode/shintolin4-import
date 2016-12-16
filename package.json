@@ -1,0 +1,15 @@
+{
+  "name": "shintolin4-import",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "dotenv": "^2.0.0",
+    "mongodb": "^2.2.16",
+    "pg-promise": "^5.5.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
