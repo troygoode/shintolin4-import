@@ -19,7 +19,6 @@ module.exports = ({ pg, pgp, mongo }) => {
             hp_max: creature.hp_max
           }
           const sql = pgp.helpers.insert(row, null, 'creatures')
-          console.log(sql)
           return pg.none(sql)
         })
     })
