@@ -64,11 +64,37 @@ module.exports = ({ pg, pgp, mongo }) => {
       })
       .then(() => {
         // stats
-        // TODO
+        const row = {
+          character_id: characterId,
+          hp: character.hp,
+          hp_max: character.hp_max,
+          ap: character.ap,
+          survival: (12 - character.hunger),
+          level: character.level,
+          xp_warrior: character.xp_warrior,
+          xp_crafter: character.xp_crafter,
+          xp_herbalist: character.xp_herbalist,
+          xp_wanderer: character.xp_wanderer
+        }
+        const sql = pgp.helpers.insert(row, null, 'stats')
+        return pg.none(sql)
       })
       .then(() => {
         // profiles
-        // TODO
+        // (purposefully ignore settlement data)
+        const row = {
+          character_id: characterId,
+          bio: character.bio,
+          image_url: character.image_url,
+          kills: character.kills,
+          frags: character.frags,
+          deaths: character.deaths,
+          revives: character.revives,
+          last_died_at: character.last_death,
+          created_at: character.created
+        }
+        const sql = pgp.helpers.insert(row, null, 'stats')
+        return pg.none(sql)
       })
   }
 
@@ -85,6 +111,9 @@ module.exports = ({ pg, pgp, mongo }) => {
         created_at: new Date(character.created),
         updated_at: new Date(character.created)
       }
+      if (character.developer === true) {
+        row.tags = ['developer']
+      }
       const sql = pgp.helpers.insert(row, null, 'users')
       return pg.none(sql)
         .then(() => {
@@ -95,6 +124,9 @@ module.exports = ({ pg, pgp, mongo }) => {
             .then(({id: tileId}) => {
               const row = {
                 name: character.name
+              }
+              if (character.developer === true) {
+                row.tags = ['developer']
               }
               const sql = pgp.helpers.insert(row, null, 'characters')
               return pg.none(sql)
