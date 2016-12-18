@@ -4,8 +4,6 @@ This tool is a one-off for migrate data from Shintolin V3's MongoDB-based databa
 
 ## TODO
 
-* [ ] characters.last_action
-* [ ] Settlements
 * [ ] Settlement Membership
 * [ ] Settlement Voting
 * [ ] Tile -> Settlement Mapping
@@ -16,8 +14,8 @@ This tool is a one-off for migrate data from Shintolin V3's MongoDB-based databa
 
 Specify the following values in a `.env` file:
 
-* MONGODB_URL
-* POSTGRES_URL
+* `MONGODB_URL`
+* `POSTGRES_URL`
 
 ```javascript
 $ npm install

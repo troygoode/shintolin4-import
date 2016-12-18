@@ -3,6 +3,10 @@ const randomString = require('randomstring')
 
 const FIND_TILE_SQL = 'SELECT id FROM tiles WHERE x = $<x> AND y = $<y> AND z = $<z>;'
 
+const nullifyEmptyString = (s) => {
+  return s && s.length ? s : null
+}
+
 module.exports = ({ pg, pgp, mongo }) => {
   console.log(' - characters')
 
@@ -74,7 +78,8 @@ module.exports = ({ pg, pgp, mongo }) => {
           xp_warrior: character.xp_warrior,
           xp_crafter: character.xp_crafter,
           xp_herbalist: character.xp_herbalist,
-          xp_wanderer: character.xp_wanderer
+          xp_wanderer: character.xp_wanderer,
+          activity_at: character.last_action
         }
         const sql = pgp.helpers.insert(row, null, 'stats')
         return pg.none(sql)
@@ -84,8 +89,8 @@ module.exports = ({ pg, pgp, mongo }) => {
         // (purposefully ignore settlement data)
         const row = {
           character_id: characterId,
-          bio: character.bio,
-          image_url: character.image_url,
+          bio: nullifyEmptyString(character.bio),
+          image_url: nullifyEmptyString(character.image_url),
           kills: character.kills,
           frags: character.frags,
           deaths: character.deaths,
@@ -93,7 +98,7 @@ module.exports = ({ pg, pgp, mongo }) => {
           last_died_at: character.last_death,
           created_at: character.created
         }
-        const sql = pgp.helpers.insert(row, null, 'stats')
+        const sql = pgp.helpers.insert(row, null, 'profiles')
         return pg.none(sql)
       })
   }
@@ -133,7 +138,7 @@ module.exports = ({ pg, pgp, mongo }) => {
                 .catch((err) => {
                   if (err.constraint === 'characters_name_idx_unique') {
                     row.name = randomString.generate(8)
-                    console.log(`Name conflict! New name: ${row.name}`)
+                    console.log(`Name conflict! Old name: ${character.name}; New name: ${row.name}`)
                     const sql = pgp.helpers.insert(row, null, 'characters')
                     return pg.none(sql)
                   } else {
