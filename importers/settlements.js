@@ -2,24 +2,20 @@ const Bluebird = require('bluebird')
 const randomString = require('randomstring')
 
 const FIND_TILE_SQL = 'SELECT id FROM tiles WHERE x = $<x> AND y = $<y> AND z = $<z>;'
-const FIND_CHAR_SQL = 'SELECT id FROM characters WHERE name ILIKE $<name>;'
 const FIND_SETTLEMENT_SQL = 'SELECT id FROM settlements WHERE name = $<name>;'
 
 const nullifyEmptyString = (s) => {
   return s && s.length ? s : null
 }
 
-module.exports = ({ pg, pgp, mongo }) => {
+module.exports = ({ pg, pgp, mongo, mappings }) => {
   console.log(' - settlements')
 
   const findCharacter = (mongoId) => {
-    return Bluebird.resolve()
-      .then(() => {
-        const col = mongo.collection('characters')
-        return col.findOne({_id: mongoId})
-      })
-      .then((c) => pg.one(FIND_CHAR_SQL, {name: c.name}))
-      .then((c) => c.id)
+    if (!mongoId) {
+      return null
+    }
+    return mappings.characters[mongoId.toString()]
   }
 
   return Bluebird.resolve()
@@ -73,23 +69,47 @@ module.exports = ({ pg, pgp, mongo }) => {
           UPDATE profiles
           SET
             settlement_id = $<settlementId>,
-            settlement_joined_at = $<joined>
+            settlement_joined_at = $<joined>,
+            settlement_vote_id = $<votingForId>
           WHERE
             character_id = $<cId>;
         `
         return Bluebird.resolve(settlement.members || [])
           .each((member) => {
-            return findCharacter(member._id)
-              .then((cId) => {
-                return pg.none(UPDATE_JOIN, {cId, settlementId, joined: member.joined})
+            return Bluebird.all([
+              findCharacter(member._id),
+              member.voting_for ? findCharacter(member.voting_for._id) : null
+            ])
+            .then(([cId, votingForId]) => {
+              return pg.none(UPDATE_JOIN, {
+                cId,
+                settlementId,
+                votingForId,
+                joined: member.joined
               })
+            })
           })
       })
-      .then(() => {
-        // TODO voting
-      })
-      .then(() => {
-        // TODO tile mapping
+      .tap((settlementId) => {
+        // tile mapping
+        const UPDATE_MAPPING = `
+          UPDATE tiles
+          SET settlement_id = $<settlementId>
+          WHERE x = $<x> AND y = $<y> AND z = $<z>;
+        `
+        return Bluebird.resolve()
+          .then(() => {
+            const col = mongo.collection('tiles')
+            return col.find({settlement_id: {$exists: true}}).toArray()
+          })
+          .each((tile) => {
+            return pg.none(UPDATE_MAPPING, {
+              settlementId,
+              x: tile.x,
+              y: tile.y,
+              z: tile.z
+            })
+          })
       })
     })
 }

@@ -4,10 +4,6 @@ This tool is a one-off for migrate data from Shintolin V3's MongoDB-based databa
 
 ## TODO
 
-* [ ] Settlement Membership
-* [ ] Settlement Voting
-* [ ] Tile -> Settlement Mapping
-* [ ] Hits
 * [ ] Chat Messages / Broadcasts / etc.
 
 ## Usage

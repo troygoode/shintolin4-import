@@ -15,9 +15,12 @@ const hitsImporter = require('./importers/hits')
 const chatImporter = require('./importers/chat')
 
 const pg = pgp(process.env.POSTGRES_URL)
+const mappings = {
+  characters: {}
+}
 const wrap = (fn) => {
   return (mongo) => {
-    return fn({ pg, pgp, mongo })
+    return fn({ pg, pgp, mongo, mappings })
   }
 }
 

@@ -7,7 +7,7 @@ const nullifyEmptyString = (s) => {
   return s && s.length ? s : null
 }
 
-module.exports = ({ pg, pgp, mongo }) => {
+module.exports = ({ pg, pgp, mongo, mappings }) => {
   console.log(' - characters')
 
   const createCharacter = ({ character, characterId, userId, tileId }) => {
@@ -149,6 +149,7 @@ module.exports = ({ pg, pgp, mongo }) => {
                   return pg.one('SELECT id FROM characters WHERE name = $<name>;', row)
                 })
                 .then(({id: characterId}) => {
+                  mappings.characters[character._id.toString()] = characterId
                   return createCharacter({
                     character,
                     characterId,
