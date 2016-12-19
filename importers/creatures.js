@@ -6,8 +6,8 @@ module.exports = ({ pg, pgp, mongo }) => {
   console.log(' - creatures')
   return Bluebird.resolve()
     .then(() => {
-      const characters = mongo.collection('characters')
-      return characters.find({ creature: {$exists: true} }).toArray()
+      const col = mongo.collection('characters')
+      return col.find({ creature: {$exists: true} }).toArray()
     })
     .each((creature) => {
       return pg.one(FIND_TILE_SQL, creature)

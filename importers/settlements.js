@@ -61,7 +61,10 @@ module.exports = ({ pg, pgp, mongo, mappings }) => {
           .then(() => {
             return pg.one(FIND_SETTLEMENT_SQL, {name: row.name})
           })
-          .then(({id}) => id)
+          .then(({id}) => {
+            mappings.settlements[settlement._id.toString()] = id
+            return id
+          })
       })
       .tap((settlementId) => {
         // membership
