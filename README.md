@@ -2,6 +2,12 @@
 
 This tool is a one-off for migrate data from Shintolin V3's MongoDB-based database into Shintolin V4's PostgreSQL-based database.
 
+## Mongo Restore
+
+```bash
+$ mongorestore -h mongo <FILENAME>
+```
+
 ## Usage
 
 Specify the following values in a `.env` file:
@@ -10,8 +16,8 @@ Specify the following values in a `.env` file:
 * `POSTGRES_URL`
 
 ```javascript
-$ npm install
-$ npm start
+$ yarn install
+$ yarn start
 ```
 
 ## License

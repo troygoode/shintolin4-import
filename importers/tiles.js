@@ -9,13 +9,15 @@ module.exports = ({ pg, pgp, mongo }) => {
 
     return pg.one('SELECT id FROM tiles WHERE x = $<x> AND y = $<y> AND z = $<z>;', tile)
       .then(({id}) => {
-        return tile.items.map((t) => {
-          return {
-            tile_id: id,
-            item: t.item,
-            quantity: t.count
-          }
-        })
+        return tile.items
+          .map((t) => {
+            return {
+              tile_id: id,
+              item: t.item,
+              quantity: t.count
+            }
+          })
+          .filter((t) => t.count > 0)
       })
       .each((row) => {
         const sql = pgp.helpers.insert(row, null, 'tiles_items')
@@ -47,7 +49,7 @@ module.exports = ({ pg, pgp, mongo }) => {
         building: tile.building,
         building_hp: tile.hp,
 
-        searches: tile.searches,
+        searches: tile.searches || 0,
         signage: tile.message
       }
 
@@ -67,7 +69,12 @@ module.exports = ({ pg, pgp, mongo }) => {
 
       const sql = pgp.helpers.insert(row, null, 'tiles')
       return pg.none(sql)
-        .return(tile)
-        .then(importTileItems)
+        .catch((err) => {
+          console.log(err)
+          throw err
+        })
+        .then(() => {
+          return importTileItems(tile)
+        })
     })
 }
